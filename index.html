@@ -2,37 +2,215 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <title>Base44 Test-App</title>
+  <title>Spiel-Launcher</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      max-width: 800px;
-      margin: 40px auto;
-    }
-    textarea {
-      width: 100%;
+    * {
       box-sizing: border-box;
     }
-    button {
-      margin-right: 8px;
-      padding: 6px 12px;
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: Arial, sans-serif;
+      background: radial-gradient(circle at top, #1f2937, #020617);
+      color: #e5e7eb;
+      padding: 16px;
+    }
+
+    .wrapper {
+      width: 100%;
+      max-width: 960px;
+    }
+
+    header {
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    h1 {
+      margin: 0 0 6px 0;
+      font-size: 28px;
+    }
+
+    .subtitle {
+      margin: 0;
+      font-size: 14px;
+      color: #9ca3af;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 16px;
+    }
+
+    .card {
+      background: #020617;
+      border-radius: 16px;
+      padding: 16px 18px;
+      border: 1px solid #1f2937;
+      box-shadow: 0 14px 30px rgba(0, 0, 0, 0.55);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: transform 0.1s ease, box-shadow 0.1s ease, border-color 0.1s ease;
+    }
+
+    .card.playable:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 18px 40px rgba(59, 130, 246, 0.8);
+      border-color: #3b82f6;
+    }
+
+    .card h2 {
+      margin: 0 0 4px 0;
+      font-size: 18px;
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      background: #111827;
+      color: #9ca3af;
+      margin-bottom: 10px;
+    }
+
+    .card p {
+      margin: 0 0 14px 0;
+      font-size: 13px;
+      color: #d1d5db;
+    }
+
+    .actions {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 999px;
+      padding: 8px 14px;
+      font-size: 13px;
+      cursor: pointer;
+      background: #2563eb;
+      color: white;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.6);
+      transition: background 0.1s ease, transform 0.08s ease, box-shadow 0.08s ease;
+    }
+
+    .btn:hover {
+      background: #1d4ed8;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(37, 99, 235, 0.8);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+      box-shadow: 0 3px 8px rgba(37, 99, 235, 0.6);
+    }
+
+    .btn-disabled {
+      background: #374151;
+      box-shadow: none;
+      cursor: default;
+    }
+
+    .btn-disabled:hover {
+      background: #374151;
+      transform: none;
+      box-shadow: none;
+    }
+
+    footer {
+      margin-top: 18px;
+      text-align: center;
+      font-size: 11px;
+      color: #6b7280;
+    }
+
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 22px;
+      }
     }
   </style>
 </head>
 <body>
-  <h1>Base44 Encoder / Decoder</h1>
+  <div class="wrapper">
+    <header>
+      <h1>Julian Arcade</h1>
+      <p class="subtitle">
+        Wähle ein Spiel aus. Du kannst später beliebig viele weitere Spiele hinzufügen.
+      </p>
+    </header>
 
-  <h3>Eingabe</h3>
-  <textarea id="input" rows="4" placeholder="Text oder Base44 eingeben..."></textarea>
+    <main class="grid">
+      <!-- Spiel 1: Klick das Quadrat -->
+      <article class="card playable">
+        <div>
+          <div class="tag">Reaktion</div>
+          <h2>Klick das Quadrat</h2>
+          <p>
+            Triff so viele leuchtende Quadrate wie möglich in 30 Sekunden.
+            Mit Soundeffekten, Musik und Highscore.
+          </p>
+        </div>
+        <div class="actions">
+          <a class="btn" href="klickspiel.html">
+            🎮 Spielen
+          </a>
+        </div>
+      </article>
 
-  <br><br>
-  <button onclick="encode()">Encode (Text → Base44)</button>
-  <button onclick="decode()">Decode (Base44 → Text)</button>
+      <!-- Spiel 2: Runner (Jump & Run) -->
+      <article class="card playable">
+        <div>
+          <div class="tag">Jump &amp; Run</div>
+          <h2>Runner</h2>
+          <p>
+            Laufe über eine endlose Strecke und springe über alle Hindernisse.
+            Je weiter du kommst, desto schneller wird es.
+          </p>
+        </div>
+        <div class="actions">
+          <a class="btn" href="runner.html">
+            🏃 Starten
+          </a>
+        </div>
+      </article>
 
-  <h3>Ausgabe</h3>
-  <textarea id="output" rows="4" placeholder="Ergebnis..."></textarea>
+      <!-- Platzhalter Spiel 3 -->
+      <article class="card">
+        <div>
+          <div class="tag">Bald verfügbar</div>
+          <h2>Spiel 3</h2>
+          <p>
+            Noch ein Slot für ein weiteres Projekt. Alles läuft über
+            denselben Launcher.
+          </p>
+        </div>
+        <div class="actions">
+          <button class="btn btn-disabled" type="button">
+            🔒 In Arbeit
+          </button>
+        </div>
+      </article>
+    </main>
 
-  <!-- Hier wird deine index.js geladen -->
-  <script src="index.js"></script>
+    <footer>
+      Tipp: Für jedes neue Spiel einfach eine eigene <code>*.html</code>-Datei anlegen
+      und hier einen neuen Eintrag mit Link ergänzen.
+    </footer>
+  </div>
 </body>
 </html>
