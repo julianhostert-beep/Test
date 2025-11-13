@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Base44 Test-App</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 40px auto;
+    }
+    textarea {
+      width: 100%;
+      box-sizing: border-box;
+    }
+    button {
+      margin-right: 8px;
+      padding: 6px 12px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Base44 Encoder / Decoder</h1>
+
+  <h3>Eingabe</h3>
+  <textarea id="input" rows="4" placeholder="Text oder Base44 eingeben..."></textarea>
+
+  <br><br>
+  <button onclick="encode()">Encode (Text → Base44)</button>
+  <button onclick="decode()">Decode (Base44 → Text)</button>
+
+  <h3>Ausgabe</h3>
+  <textarea id="output" rows="4" placeholder="Ergebnis..."></textarea>
+
+  <!-- Hier wird deine index.js geladen -->
+  <script src="index.js"></script>
+</body>
+</html>
