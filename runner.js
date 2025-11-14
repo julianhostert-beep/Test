@@ -1,9 +1,22 @@
+// ===== Basis-Physik-Werte (müssen VOR dem ersten Aufruf gesetzt sein) =====
+let baseGravity = 2600;
+let baseJumpStrength = 950; // hier kannst du später fein-tunen
+let gravity = baseGravity;
+let jumpStrength = baseJumpStrength;
+
 // ===== Canvas & Resize =====
 const runnerCanvas = document.getElementById("runnerCanvas");
 const rctx = runnerCanvas.getContext("2d");
 
 let rWidth = 800;
 let rHeight = 450;
+
+// passt die Physik an die aktuelle Canvas-Höhe an
+function updatePhysicsByHeight() {
+  const scale = rHeight / 450; // Referenzhöhe 450px
+  gravity = baseGravity * scale;
+  jumpStrength = baseJumpStrength * scale;
+}
 
 function resizeRunnerCanvas() {
   const wrapper = document.querySelector(".canvas-wrapper");
@@ -14,6 +27,8 @@ function resizeRunnerCanvas() {
 
   runnerCanvas.width = rWidth;
   runnerCanvas.height = rHeight;
+
+  updatePhysicsByHeight();
 }
 
 window.addEventListener("resize", resizeRunnerCanvas);
@@ -32,8 +47,6 @@ function playSfx(audioEl) {
 
 // ===== Welt & Spieler =====
 let player, obstacles, groundY;
-let gravity = 2600;
-let jumpStrength = 1050;
 let gameSpeed = 320;
 let maxGameSpeed = 700;
 let obstacleTimer = 0;
@@ -64,11 +77,9 @@ let worldTime = 0; // 0..1
 
 // ===== Hilfsfunktionen =====
 function drawBlock(x, y, w, h, colorFront, colorTop) {
-  // Front
   rctx.fillStyle = colorFront;
   rctx.fillRect(x, y, w, h);
 
-  // Top
   const topHeight = h * 0.25;
   rctx.fillStyle = colorTop;
   rctx.beginPath();
@@ -123,7 +134,7 @@ function resetRunner() {
   document.getElementById("distance").textContent = 0;
 }
 
-// „Soft“-Reset nach Treffer (Distanz bleibt)
+// Soft-Reset nach Treffer
 function softResetAfterHit() {
   const baseWidth = rWidth * 0.06;
   const baseHeight = rHeight * 0.18;
@@ -139,7 +150,7 @@ function softResetAfterHit() {
   obstacleTimer = 0;
 }
 
-// Hindernisse: Steine & Bäume im Block-Look
+// Hindernisse
 function spawnObstacle() {
   const type = Math.random() < 0.55 ? "stone" : "tree";
   let width, height;
@@ -169,7 +180,6 @@ function startRunner() {
   lastTime = performance.now();
 }
 
-// Pause-Toggle
 function togglePause() {
   if (!runnerRunning) return;
   isPaused = !isPaused;
@@ -258,16 +268,13 @@ runnerCanvas.addEventListener("touchstart", (e) => {
 
 // ===== Update =====
 function updateRunner(dt) {
-  // Tag/Nacht
   worldTime = (worldTime + dt * 0.03) % 1;
 
   updateDust(dt);
 
   if (!runnerRunning || isPaused) return;
 
-  if (runnerRunning) {
-    runAnimTime += dt * 8;
-  }
+  runAnimTime += dt * 8;
 
   const prevGrounded = player.grounded;
 
@@ -283,7 +290,6 @@ function updateRunner(dt) {
     player.grounded = false;
   }
 
-  // Staub & Land-Sound
   if (player.grounded && !prevGrounded) {
     spawnDust();
     playSfx(sfxLand);
@@ -347,7 +353,6 @@ function handleHit() {
 function drawBackground() {
   const horizonY = groundY - rHeight * 0.45;
 
-  // Tag/Nacht
   const daySkyTop = [56, 189, 248];
   const daySkyBottom = [37, 99, 235];
   const nightSkyTop = [15, 23, 42];
@@ -380,7 +385,7 @@ function drawBackground() {
   rctx.fillStyle = lerpColor(grassDay, grassNight, t);
   rctx.fillRect(0, groundY, rWidth, rHeight - groundY);
 
-  // Boden-Blöcke im Vordergrund
+  // Boden-Blöcke
   const blockW = rWidth * 0.06;
   const blockH = rHeight * 0.08;
   for (let x = -blockW; x < rWidth + blockW; x += blockW * 0.9) {
@@ -443,7 +448,6 @@ function drawPlayer() {
   const bodyY = headY + headH;
   const legY = bodyY + bodyH;
 
-  // Beine – Sprungpose in der Luft
   let swing;
   if (runnerRunning && !isPaused && p.grounded) {
     swing = Math.sin(runAnimTime * 6);
@@ -461,7 +465,6 @@ function drawPlayer() {
   rctx.fillRect(leftX, legY, p.width * 0.35, legH);
   rctx.fillRect(rightX, legY, p.width * 0.35, legH);
 
-  // Körper
   drawBlock(
     p.x,
     bodyY,
@@ -471,7 +474,6 @@ function drawPlayer() {
     "#4ade80"
   );
 
-  // Kopf
   drawBlock(
     p.x + p.width * 0.05,
     headY,
@@ -481,11 +483,9 @@ function drawPlayer() {
     "#fde047"
   );
 
-  // Gesichtsschatten
   rctx.fillStyle = "rgba(0,0,0,0.12)";
   rctx.fillRect(p.x + p.width * 0.05, headY, p.width * 0.25, headH);
 
-  // Augen – nach rechts
   rctx.fillStyle = "#0f172a";
   const eyeSize = headH * 0.16;
   const eyeY = headY + headH * 0.36;
@@ -535,18 +535,10 @@ function drawRunner() {
   rctx.clearRect(0, 0, rWidth, rHeight);
   drawBackground();
 
-  // Hindernisse
-  for (const o of obstacles) {
-    drawObstacle(o);
-  }
-
-  // Staub
+  for (const o of obstacles) drawObstacle(o);
   drawDust();
-
-  // Spieler
   drawPlayer();
 
-  // Overlays
   if (!runnerRunning) {
     rctx.fillStyle = "rgba(15,23,42,0.65)";
     rctx.fillRect(0, 0, rWidth, rHeight);
