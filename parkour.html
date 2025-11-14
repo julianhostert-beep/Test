@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Parkour – Runner</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: Arial, sans-serif;
+      background: radial-gradient(circle at top, #020617, #000000);
+      color: #e5e7eb;
+      padding: 16px;
+    }
+
+    .wrapper {
+      width: 100%;
+      max-width: 960px;
+    }
+
+    .back-link {
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      font-size:13px;
+      color:#9ca3af;
+      text-decoration:none;
+      margin-bottom:8px;
+    }
+
+    .back-link:hover {
+      color:#e5e7eb;
+    }
+
+    .card {
+      background:#020617;
+      border-radius:16px;
+      padding:18px 20px;
+      border:1px solid #1f2937;
+      box-shadow:0 18px 40px rgba(0,0,0,0.7);
+    }
+
+    h1 {
+      margin:0 0 4px 0;
+      font-size:24px;
+    }
+
+    .subtitle {
+      margin:0 0 12px 0;
+      color:#9ca3af;
+      font-size:13px;
+    }
+
+    .hero {
+      margin-bottom:12px;
+      border-radius:12px;
+      overflow:hidden;
+      border:1px solid #1f2937;
+    }
+
+    .hero img {
+      width:100%;
+      display:block;
+    }
+
+    .hud {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-bottom:10px;
+      font-size:13px;
+    }
+
+    .hud-left {
+      display:flex;
+      gap:14px;
+      flex-wrap:wrap;
+    }
+
+    .stat-label {
+      color:#9ca3af;
+      margin-right:4px;
+    }
+
+    .hud-right {
+      font-size:12px;
+      color:#9ca3af;
+      text-align:right;
+    }
+
+    .canvas-wrapper {
+      margin-top:8px;
+      background:#020617;
+      border-radius:16px;
+      padding:10px;
+    }
+
+    #parkourCanvas {
+      display:block;
+      width:100%;
+      max-width:900px;
+      aspect-ratio:16 / 9;
+      border-radius:12px;
+      background:linear-gradient(to top, #020617 40%, #0f172a 100%);
+      border:1px solid #1f2937;
+      margin:0 auto;
+      touch-action:none;
+    }
+
+    .hint {
+      margin-top:8px;
+      font-size:12px;
+      color:#9ca3af;
+      text-align:center;
+    }
+
+    @media (max-width:600px) {
+      h1 { font-size:20px; }
+      .hud-right { text-align:left; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <a href="index.html" class="back-link">⬅ Zurück zum Launcher</a>
+
+    <div class="card">
+      <h1>Parkour – Runner</h1>
+      <p class="subtitle">
+        Laufe über Dächer und Plattformen. Steuerung: <strong>A/D</strong> seitwärts,
+        <strong>W</strong> schneller, <strong>S</strong> langsamer, <strong>Leertaste</strong> springen.
+        Berührst du ein Hindernis, verlierst du ein Leben.
+      </p>
+
+      <!-- Hero-Bild -->
+      <div class="hero">
+        <img src="parkour-header.png" alt="Parkour Runner Vorschau">
+      </div>
+
+      <div class="hud">
+        <div class="hud-left">
+          <div><span class="stat-label">Distanz:</span><span id="distance">0</span> m</div>
+          <div><span class="stat-label">Leben:</span><span id="lives">♥♥♥</span></div>
+          <div><span class="stat-label">Best:</span><span id="best">0</span> m</div>
+        </div>
+        <div class="hud-right">
+          Tipp: Halte die Sprünge kurz – lieber öfter springen als einmal zu spät.
+        </div>
+      </div>
+
+      <div class="canvas-wrapper">
+        <canvas id="parkourCanvas"></canvas>
+        <div class="hint">
+          Hinweis: Parkour ist auf Tastatur ausgelegt. Auf dem Handy kannst du nur zuschauen.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Spiel-Logik -->
+  <script src="parkour.js"></script>
+</body>
+</html>
