@@ -1,17 +1,37 @@
-// Canvas & Kontext
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
+let width = 800;
+let height = 400;
+
+function resizeCanvas() {
+  const wrapper = document.querySelector(".canvas-wrapper");
+  const availableWidth = wrapper.clientWidth - 24;
+  const maxWidth = 700;
+  width = Math.min(availableWidth, maxWidth);
+  height = width * 0.6;
+
+  canvas.width = width;
+  canvas.height = height;
+
+  // Quadratgröße an neue Breite anpassen
+  square.size = width * squareSizeFactor;
+}
+
+window.addEventListener("resize", resizeCanvas);
+resizeCanvas();
+
 // Audio
 const hitSound = document.getElementById("sfx-hit");
-const bgMusic = document.getElementById("music-bg");
+const bgMusic  = document.getElementById("music-bg");
 
 let soundEnabled = true;
 let musicEnabled = false;
 
-// Spiellogik
-let square = { x: 0, y: 0, size: 0 };
-let squareSizeFactor = 0.08; // Größe relativ zur Canvas-Breite
+// Spielzustand
+let square = { x: 100, y: 100, size: 45 };
+let squareSizeFactor = 0.08; // relativ zur Breite
+
 let score = 0;
 let highscore = Number(localStorage.getItem("click_highscore") || 0);
 let timeLeft = 30;
@@ -20,59 +40,55 @@ let timerId = null;
 
 document.getElementById("highscore").textContent = highscore;
 
-// Canvas-Größe an Bildschirm anpassen
-function resizeCanvas() {
-  const wrapper = document.querySelector(".canvas-wrapper");
-  const availableWidth = wrapper.clientWidth - 20; // etwas Puffer
-  const maxWidth = 700;
-  const canvasWidth = Math.min(availableWidth, maxWidth);
-  const aspect = 7 / 4;
-
-  canvas.width = canvasWidth;
-  canvas.height = canvasWidth / aspect;
-
-  // Quadratgröße neu berechnen
-  square.size = squareSizeFactor * canvas.width;
-
-  // Quadrat im sichtbaren Bereich halten
-  if (square.x + square.size > canvas.width) {
-    square.x = Math.max(0, canvas.width - square.size);
-  }
-  if (square.y + square.size > canvas.height) {
-    square.y = Math.max(0, canvas.height - square.size);
-  }
-}
-
-// Zufällige Position für das Quadrat
+// Hilfsfunktionen
 function randomPosition() {
-  const maxX = canvas.width - square.size;
-  const maxY = canvas.height - square.size;
+  const maxX = width  - square.size;
+  const maxY = height - square.size;
   square.x = Math.floor(Math.random() * maxX);
   square.y = Math.floor(Math.random() * maxY);
 }
 
-// Zeichnen
 function draw() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  // Hintergrund
+  ctx.clearRect(0, 0, width, height);
+
+  const grad = ctx.createLinearGradient(0, 0, 0, height);
+  grad.addColorStop(0, "#1e293b");
+  grad.addColorStop(1, "#020617");
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, width, height);
+
+  // Spielfeld-Rahmen
+  ctx.strokeStyle = "#111827";
+  ctx.lineWidth = 2;
+  ctx.strokeRect(4, 4, width - 8, height - 8);
 
   if (gameRunning) {
-    ctx.shadowColor = "rgba(96, 165, 250, 0.8)";
+    // Glow-Quadrat
+    ctx.shadowColor = "rgba(96, 165, 250, 0.9)";
     ctx.shadowBlur = 18;
     ctx.fillStyle = "#60a5fa";
     ctx.fillRect(square.x, square.y, square.size, square.size);
     ctx.shadowBlur = 0;
+  } else {
+    // Hinweistext
+    ctx.fillStyle = "rgba(148,163,184,0.9)";
+    ctx.font = `${Math.floor(height * 0.08)}px Arial`;
+    ctx.textAlign = "center";
+    ctx.fillText("Klicke auf „Spiel starten“", width / 2, height / 2);
   }
 
   requestAnimationFrame(draw);
 }
 
-// Spiel starten
+// Spielsteuerung
 function startGame() {
   score = 0;
   timeLeft = 30;
+  squareSizeFactor = 0.08;
+  square.size = width * squareSizeFactor;
   gameRunning = true;
-  squareSizeFactor = 0.08; // zurücksetzen
-  square.size = squareSizeFactor * canvas.width;
+
   document.getElementById("score").textContent = score;
   document.getElementById("time").textContent = timeLeft;
 
@@ -83,9 +99,7 @@ function startGame() {
     bgMusic.play().catch(() => {});
   }
 
-  if (timerId !== null) {
-    clearInterval(timerId);
-  }
+  if (timerId !== null) clearInterval(timerId);
   timerId = setInterval(tick, 1000);
 }
 
@@ -97,13 +111,10 @@ function tick() {
   }
 }
 
-// Spiel beenden
 function endGame() {
   gameRunning = false;
   clearInterval(timerId);
-  if (!bgMusic.paused) {
-    bgMusic.pause();
-  }
+  if (!bgMusic.paused) bgMusic.pause();
 
   if (score > highscore) {
     highscore = score;
@@ -115,13 +126,29 @@ function endGame() {
   }
 }
 
-// Mausklick / Touch
-function handlePointer(clientX, clientY) {
-  if (!gameRunning) return;
-
+// Klick-/Touch-Erkennung mit Skalierung
+function getCanvasCoords(evt) {
   const rect = canvas.getBoundingClientRect();
-  const x = clientX - rect.left;
-  const y = clientY - rect.top;
+  const scaleX = canvas.width  / rect.width;
+  const scaleY = canvas.height / rect.height;
+
+  let clientX, clientY;
+
+  if (evt.touches && evt.touches.length > 0) {
+    clientX = evt.touches[0].clientX;
+    clientY = evt.touches[0].clientY;
+  } else {
+    clientX = evt.clientX;
+    clientY = evt.clientY;
+  }
+
+  const x = (clientX - rect.left) * scaleX;
+  const y = (clientY - rect.top)  * scaleY;
+  return { x, y };
+}
+
+function handleHit(x, y) {
+  if (!gameRunning) return;
 
   if (
     x >= square.x &&
@@ -138,58 +165,46 @@ function handlePointer(clientX, clientY) {
       hitSound.play().catch(() => {});
     }
 
-    // Schwierigkeit erhöhen: Quadrat nach und nach kleiner
+    // Quadrat kleiner machen → schwieriger
     if (score % 5 === 0 && squareSizeFactor > 0.035) {
       squareSizeFactor -= 0.005;
-      square.size = squareSizeFactor * canvas.width;
+      square.size = width * squareSizeFactor;
     }
   }
 }
 
-canvas.addEventListener("click", (event) => {
-  handlePointer(event.clientX, event.clientY);
+// Maus
+canvas.addEventListener("click", (evt) => {
+  const { x, y } = getCanvasCoords(evt);
+  handleHit(x, y);
 });
 
-// Touch-Unterstützung für Smartphones
-canvas.addEventListener("touchstart", (event) => {
-  const touch = event.touches[0];
-  handlePointer(touch.clientX, touch.clientY);
-  event.preventDefault();
-});
+// Touch
+canvas.addEventListener("touchstart", (evt) => {
+  const { x, y } = getCanvasCoords(evt);
+  handleHit(x, y);
+  evt.preventDefault();
+}, { passive: false });
 
-// Musik ein/aus
+// Buttons
 function toggleMusic() {
   musicEnabled = !musicEnabled;
   if (!musicEnabled) {
     bgMusic.pause();
-  } else if (!gameRunning) {
-    // nur abspielen, wenn schon interagiert wurde
+  } else if (gameRunning) {
+    bgMusic.currentTime = 0;
     bgMusic.play().catch(() => {});
   }
 }
 
-// Soundeffekte ein/aus
 function toggleSound() {
   soundEnabled = !soundEnabled;
 }
 
-// Canvas-Größe initial setzen & bei Fensteränderung anpassen
-window.addEventListener("resize", () => {
-  const oldWidth = canvas.width;
-  const oldHeight = canvas.height;
+// diese Funktionen werden von den Buttons in klickspiel.html aufgerufen
+window.startGame   = startGame;
+window.toggleMusic = toggleMusic;
+window.toggleSound = toggleSound;
 
-  resizeCanvas();
-
-  // Position grob proportional anpassen, wenn bereits gespielt wird
-  if (oldWidth && oldHeight) {
-    const scaleX = canvas.width / oldWidth;
-    const scaleY = canvas.height / oldHeight;
-    square.x *= scaleX;
-    square.y *= scaleY;
-    square.size = squareSizeFactor * canvas.width;
-  }
-});
-
-// Initial
-resizeCanvas();
+// Zeichenschleife starten
 draw();

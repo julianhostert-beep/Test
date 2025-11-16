@@ -279,7 +279,7 @@ function draw() {
     ctx.fillRect(o.x, o.y + o.height * 0.6, o.width, o.height * 0.4);
   }
 
-  // Spieler
+  // Spieler-Figur
   const p = state.player;
   const headH = p.height * 0.28;
   const bodyH = p.height * 0.42;
@@ -328,6 +328,5 @@ function loop(timestamp) {
   requestAnimationFrame(loop);
 }
 
-// Start
 resetGame();
 requestAnimationFrame(loop);
